@@ -1,0 +1,39 @@
+
+version: '3.8'
+
+services:
+  pdns-mariadb:
+    build: ./pdns-mariadb
+    container_name: pdns-mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: powerdns
+      MYSQL_USER: pdns
+      MYSQL_PASSWORD: pdnspass
+    networks:
+      - pdnsnet
+
+  pdns-pdns:
+    build: ./pdns-pdns
+    container_name: pdns-server
+    depends_on:
+      - pdns-mariadb
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+    networks:
+      - pdnsnet
+
+  pdns-poweradmin:
+    build: ./pdns-poweradmin
+    container_name: pdns-poweradmin
+    depends_on:
+      - pdns-mariadb
+    ports:
+      - "8080:80"
+    networks:
+      - pdnsnet
+
+networks:
+  pdnsnet:
+    driver: bridge
